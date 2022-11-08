@@ -1,0 +1,55 @@
+Cazan Bogdan-Marian 333CB
+
+                            TEMA 3 - APD
+
+        In aceasta tema am implementat un program distribuit in MPI in care
+    procesele sunt grupate intr-o topologie formata din trei clustere, fiecare
+    din acestea avand cate un coordonator s, de la 0 la 2, si cate un numar
+    arbitrar de procese worker, citite dintr-un fisier input. Procesele worker
+    dintr-un cluster pot sa comunice doar cu coordonatorul lor, iar toti cei
+    trei coordonatori pot sa comunice intre ei pentru a conecta clusterele.
+
+        In cadrul acestei teme, am ales sa nu fac o implementare diferita pentru
+    bonus, ci sa fac din prima topologia astfel incat sa nu se foloseasa deloc
+    calea intre coordonatorul 0 si coordonatorul 1.
+
+        Tema este constituita din doua parti, una de topologie, in care fiecare
+    proces va afla topologia, si o alta parte de computare a unui vector de
+    catre toate procesele worker.
+
+        Aflarea topologiei: lucrul incepe de la coordonatorul 0; acesta stie
+    topologia cluster-ului sau, dupa care o sa trimita la coordonatorul 2, care
+    va trimite mai departe la coordonatorul 1. In acest moment, coordonatorul 1
+    va da mai departe informatia catre workerii sai, acum atat el, cat si
+    workerii sai, stiind toata topologia. Workerul 1 isi va trimite componenta
+    cluster-ului sau catre 2, care deja stie cluster-ul 0 si cluster-ul sau.
+    Prin urmare, 2 va da mai departe catre workerii sai topologia, care o vor
+    afisa, pentru ca, in final, coordonatorul 2 sa trimita catre coordonatorul
+    0 topologia proprie, alaturi de topologia lui 1. In momentul acesta,
+    coordonatorul 0 va afisa topologia completa, dupa care va da mai departe si
+    catre workerii sai. In final, toate procesele vor cunoaste acum topologia
+    finala.
+
+        Dupa ce s-a aflat intreaga topologie, se va trece la urmatoarea parte,
+    aceea de realizare a calculelor. In aceeasi logica se vor trimite si
+    urmatoarele mesaje: 0 catre 2, 2 catre 1, 1 inapoi catre 2, si 2 inapoi
+    catre 0. Primul coordonator (coordonatorul 0) va lua prima parte din 
+    vectorul initial, va da bucati din el catre workerii sai, si va primi partea
+    noua, computata; dupa aceasta, restul vectorului neprelucrat va fi dat 
+    catre coordonatorul clusterului 2. Acesta va lua din noul subvector partea
+    sa, trimitand catre 1 restul. Coordonatorul 2 va trimite catre workeri bucata
+    sa neprelucrata, urmand sa o primeasca computata. La fel si pentru ultimul
+    coordonator din topologia aleasa, coordonatorul 1, care va trimite si primi
+    de la workerii sai noul subvector.
+
+        In final, se vor retrimite datele deja prelucrate catre coordonatorul 0,
+    (1 va trimite catre 2 partea sa, iar 2 va trimite catre 0 atat partea sa,
+    cat si partea facuta de cluster-ul 1). In final, task-ul 0 va avea rolul 
+    de a afisa rezultatul final. Pentru a nu se intercala la stdout mesajele
+    de la prima parte cu mesajele de la a doua parte, am ales sa folosesc si
+    MPI_Barrier.
+
+        Pentru bonus, am ales sa folosesc o implementare directa, care sa faca
+    topologia direct ca si cand nodul 0 nu ar putea sa comunice cu nodul 1. Prin
+    urmare, ultimul argument din linia de comanda nu are nicio influenta asupra
+    rularii programului, rezultatul fiind acelasi (asa cum era si de asteptat).
